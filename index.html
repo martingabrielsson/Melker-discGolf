@@ -248,7 +248,8 @@
     /* "Friends Don't Lie" — monokrom + varm röd accent, inspirerad av retro affischkonst och handskriven marker-stil. */
     :root { --ink:#f4f2ee; --green:#e0362a; --leaf:#f4f2ee; --lime:#241514; --sand:#0b0b0b; --paper:#1a1917; --muted:#9c9892; --line:#332f2c; --danger:#e0362a; --shadow:4px 5px 0 rgba(0,0,0,.7); }
     body { background-color:var(--sand); background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.5px); background-size:9px 9px; }
-    h1 { transform:rotate(-1.5deg); display:inline-block; text-shadow:3px 3px 0 var(--green); }
+    h1 { transform:rotate(-1.5deg); transform-origin:left center; text-shadow:3px 3px 0 var(--green); }
+    .back { display:block; }
     h2 { text-shadow:2px 2px 0 var(--green); }
     .course:disabled { background:#151412; }
     input[type=text], input[type=number], select { background:#141311; color:var(--ink); }
@@ -382,6 +383,7 @@
       <button class="text-btn back" type="button" data-go="home">‹ Till start</button>
       <h1 id="statsTitle">Statistik</h1>
       <div id="statsBody"></div>
+      <div class="actions"><button class="btn danger" type="button" id="clearStats">Rensa statistik</button></div>
     </section>
 
     <section class="view" id="historyView" aria-labelledby="historyTitle">
@@ -923,6 +925,7 @@
 
     /* ---------- events ---------- */
     $('statsButton').addEventListener('click', renderStats);
+    $('clearStats').addEventListener('click', () => confirmAction('Rensa statistik?', 'Alla sparade rundor tas bort permanent, inklusive listan under Tidigare rundor. Det går inte att ångra.', () => { state.history = []; saveHistory(); renderStats(); }));
     $('historyButton').addEventListener('click', renderHistory);
     $('resumeButton').addEventListener('click', () => { state.active = readActive(); if (state.active) { renderRound(); setView('round'); } });
     document.querySelectorAll('[data-go="home"]').forEach(button => button.addEventListener('click', () => { updateHome(); setView('home'); }));
