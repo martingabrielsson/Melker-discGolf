@@ -7,7 +7,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
-  <title>Discscore</title>
+  <title>MELKER'S DISCSCORE APP</title>
   <style>
     :root { --ink:#163126; --green:#1e4d39; --leaf:#76a35b; --lime:#dcebc8; --sand:#f6f3ea; --paper:#fffdf8; --muted:#607166; --line:#d8dfd4; --danger:#b13a35; --shadow:0 10px 28px rgba(20,48,37,.10); }
     * { box-sizing:border-box; }
@@ -225,14 +225,30 @@
     .course-menu-item.danger { color:var(--danger); }
     .course-menu-item:active { background:var(--lime); }
     @media (max-width:380px) { h1 { font-size:2.35rem; } .course-name { font-size:1.45rem; } }
+    /* Intro-bildspel som visas innan startsidan */
+    .splash { position:fixed; inset:0; z-index:50; overflow:hidden; background:#0d0a08; transition:opacity .35s ease; }
+    .splash.hide { opacity:0; pointer-events:none; }
+    .splash-slide { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transform:translateX(100%); transition:transform .5s ease; }
+    .splash-slide.active { transform:translateX(0); }
+    .splash-slide.prev { transform:translateX(-100%); }
+    .splash-skip-hint { position:absolute; left:0; right:0; bottom:24px; text-align:center; color:#fff; opacity:.8; font-weight:800; font-size:.85rem; text-shadow:0 1px 4px rgba(0,0,0,.5); z-index:1; }
+    @media (prefers-reduced-motion:reduce) { .splash-slide { transition:none; } }
   </style>
 </head>
 <body>
+  <div class="splash" id="splashScreen" aria-hidden="true">
+    <img class="splash-slide" src="Splash-1.jpg" alt="">
+    <img class="splash-slide" src="Splash-2.jpg" alt="">
+    <img class="splash-slide" src="Splash-3.jpg" alt="">
+    <img class="splash-slide" src="Splash-4.jpg" alt="">
+    <img class="splash-slide" src="Splash-5.jpg" alt="">
+    <div class="splash-skip-hint">Tryck för att fortsätta</div>
+  </div>
   <main class="app" id="app">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">◉</span> Discscore</div>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">◉</span> MELKER'S DISCSCORE APP</div>
 
     <section class="view active" id="homeView" aria-labelledby="homeTitle">
-      <h1 id="homeTitle">Ut på banan.</h1>
+      <h1 id="homeTitle">NUUU KASTAR VI</h1>
       <p class="lead">Välj bana, lägg till spelare och håll koll på varje kast.</p>
       <div class="course-list" id="courseList" aria-label="Tillgängliga banor"></div>
       <div class="actions">
@@ -282,6 +298,9 @@
       <img class="setup-map" id="raneboMap" src="ranebo-karta.jpg" alt="Karta över discgolfbanan Ranebo med hål 1 till 9" hidden>
       <img class="setup-map" id="falehagenImage" src="Fålehagen_DGP_Infoboard_PRINT-e1521143588317.jpg" alt="Informationstavla för Fålehagen DiscGolfPark" hidden>
       <img class="setup-map" id="karraMap" src="kärra disc golf karta.png" alt="Karta över Kärra Discgolfbana" hidden>
+      <img class="setup-map" id="slottskogenMap" src="SLOTTskogen disc golf karta.png" alt="Karta över Slottskogen DiscGolf - Gul Bana" hidden>
+      <img class="setup-map" id="motalaImage" src="Motala disc-golf BILD.png" alt="Bild från Motala DiscGolf Park" hidden>
+      <img class="setup-map" id="skatasMap" src="skatås karta.jpg" alt="Karta över Skatås DiscGolf 18 hål" hidden>
     </section>
 
     <section class="view" id="roundView" aria-labelledby="roundTitle">
@@ -373,11 +392,11 @@
     // Kärra Discgolfbana: 18 hål, par 54, 1222 m (Ut 27/602, In 27/620).
     const KARRA_HOLES = [52, 64, 53, 63, 70, 79, 72, 56, 93, 80, 78, 103, 50, 64, 54, 63, 73, 55].map((len, i) => ({ number: i + 1, par: 3, length: len }));
     const BUILTIN = {
-      tanum: { id: 'tanum', name: 'Motala DiscGolf Park', holes: MOTALA_HOLES, builtin: true },
+      tanum: { id: 'tanum', name: 'Motala DiscGolf Park', holes: MOTALA_HOLES, builtin: true, image: 'Motala disc-golf BILD.png' },
       ranebo: { id: 'ranebo', name: 'Ranebo', holes: RANEBO_HOLES, builtin: true, map: 'ranebo-karta.jpg' },
       falehagen: { id: 'falehagen', name: 'Fålehagen DiscGolfPark', holes: FALEHAGEN_HOLES, builtin: true, image: 'Fålehagen_DGP_Infoboard_PRINT-e1521143588317.jpg' },
-      skatas: { id: 'skatas', name: 'Skatås DiscGolf 18 hål', holes: SKATAS_HOLES, builtin: true },
-      slottskogen: { id: 'slottskogen', name: 'Slottskogen DiscGolf - Gul Bana', holes: SLOTT_A, builtin: true, variants: [{ key: 'A', name: 'Nivå A', holes: SLOTT_A }, { key: 'B', name: 'Nivå B', holes: SLOTT_B }] },
+      skatas: { id: 'skatas', name: 'Skatås DiscGolf 18 hål', holes: SKATAS_HOLES, builtin: true, map: 'skatås karta.jpg' },
+      slottskogen: { id: 'slottskogen', name: 'Slottskogen DiscGolf - Gul Bana', holes: SLOTT_A, builtin: true, map: 'SLOTTskogen disc golf karta.png', variants: [{ key: 'A', name: 'Nivå A', holes: SLOTT_A }, { key: 'B', name: 'Nivå B', holes: SLOTT_B }] },
       karra: { id: 'karra', name: 'Kärra Discgolfbana', holes: KARRA_HOLES, builtin: true, map: 'kärra disc golf karta.png' }
     };
     let selectedCourseId = 'ranebo';
@@ -465,7 +484,7 @@
       renderCourseList();
     }
     function renderCourseList() {
-      const courses = Object.values(allCourses());
+      const courses = Object.values(allCourses()).sort((a, b) => a.name.localeCompare(b.name, 'sv'));
       $('courseList').innerHTML = courses.map(c => {
         const id = escapeHtml(c.id);
         if (c.variants) {
@@ -569,6 +588,13 @@
       imageEl.hidden = !imageSrc; if (imageSrc) imageEl.src = imageSrc;
       const karraMapEl = $('karraMap'), karraMapSrc = (c.builtin && c.id === 'karra' && c.map) ? c.map : null;
       karraMapEl.hidden = !karraMapSrc; if (karraMapSrc) karraMapEl.src = karraMapSrc;
+      // Slottskogens karta är samma bild oavsett vald nivå (A eller B).
+      const slottMapEl = $('slottskogenMap'), slottMapSrc = (c.builtin && c.id === 'slottskogen' && c.map) ? c.map : null;
+      slottMapEl.hidden = !slottMapSrc; if (slottMapSrc) slottMapEl.src = slottMapSrc;
+      const motalaImageEl = $('motalaImage'), motalaImageSrc = (c.builtin && c.id === 'tanum' && c.image) ? c.image : null;
+      motalaImageEl.hidden = !motalaImageSrc; if (motalaImageSrc) motalaImageEl.src = motalaImageSrc;
+      const skatasMapEl = $('skatasMap'), skatasMapSrc = (c.builtin && c.id === 'skatas' && c.map) ? c.map : null;
+      skatasMapEl.hidden = !skatasMapSrc; if (skatasMapSrc) skatasMapEl.src = skatasMapSrc;
       renderRoster(); renderSetup(); setView('setup');
     }
     function renderRoster() {
@@ -896,11 +922,50 @@
     $('resultsBack').addEventListener('click', renderHistory);
     $('confirmModal').addEventListener('click', event => { if (event.target === $('confirmModal')) closeModal(); });
 
+    /* ---------- intro-bildspel ---------- */
+    function runSplash() {
+      const el = $('splashScreen');
+      if (!el) return;
+      const slides = [...el.querySelectorAll('.splash-slide')];
+      let dismissed = false;
+      const dismiss = () => {
+        if (dismissed) return; dismissed = true;
+        clearInterval(timer);
+        el.removeEventListener('click', dismiss);
+        el.classList.add('hide');
+        setTimeout(() => el.remove(), 400);
+      };
+      // Bilder som saknas (t.ex. platshållarna innan riktiga bilder är på plats) hoppas över tyst.
+      slides.forEach(img => img.addEventListener('error', () => { img.dataset.broken = '1'; img.style.display = 'none'; }));
+      const available = () => slides.filter(img => img.dataset.broken !== '1');
+      let i = -1;
+      function advance() {
+        const list = available();
+        if (!list.length) { dismiss(); return; }
+        if (i >= 0 && slides[i]) { slides[i].classList.remove('active'); slides[i].classList.add('prev'); }
+        do { i += 1; } while (i < slides.length && slides[i].dataset.broken === '1');
+        if (i >= slides.length) { dismiss(); return; }
+        slides[i].classList.add('active');
+      }
+      advance();
+      const timer = setInterval(advance, 1000);
+      el.addEventListener('click', dismiss);
+    }
+
     /* ---------- boot ---------- */
     migrate();
     updateHome();
+    runSplash();
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+      // När en ny service worker tar över (efter en uppdatering) laddar vi om sidan en gång så att
+      // en redan öppen flik/installerad app faktiskt hämtar den nya koden istället för att köra kvar på gammal.
+      let reloadedForUpdate = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloadedForUpdate) return;
+        reloadedForUpdate = true;
+        location.reload();
+      });
     }
   })();
   </script>
