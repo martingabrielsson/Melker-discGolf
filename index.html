@@ -125,8 +125,11 @@
     .grid-hint { color:var(--muted); font-size:.82rem; margin:2px 0 12px; }
     /* Roster chips */
     .chips { display:flex; flex-wrap:wrap; gap:8px; margin:2px 0 14px; }
-    .chip { border:1px solid var(--green); background:transparent; color:var(--green); border-radius:99px; padding:8px 12px; font-weight:800; font-size:.9rem; }
+    .chip-wrap { position:relative; display:inline-flex; align-items:stretch; border:1px solid var(--green); border-radius:99px; }
+    .chip { border:0; background:transparent; color:var(--green); border-radius:99px 0 0 99px; padding:8px 12px; font-weight:800; font-size:.9rem; }
     .chip.add::before { content:"+ "; }
+    .chip-kebab { border:0; border-left:1px solid var(--green); background:transparent; color:var(--green); padding:0 10px; border-radius:0 99px 99px 0; font-size:1.05rem; line-height:1; }
+    .chip-menu { top:100%; left:auto; right:0; margin-top:6px; min-width:140px; }
     /* Segmented / toggle */
     .seg { display:flex; gap:8px; margin:14px 0; }
     .seg button { flex:1; min-height:44px; border:1px solid var(--line); background:var(--paper); border-radius:12px; color:var(--muted); font-weight:800; }
@@ -201,7 +204,9 @@
     .qbtn.sel { box-shadow:2px 3px 0 var(--ink); }
     .score-value { border-top:2px solid var(--ink); border-bottom:2px solid var(--ink); background:var(--lime); color:var(--ink); }
     .score-btn:disabled { color:#8a8175; background:#e8ddc5; }
-    .chip { border:2px solid var(--ink); box-shadow:2px 3px 0 var(--ink); color:var(--ink); }
+    .chip-wrap { border:2px solid var(--ink); box-shadow:2px 3px 0 var(--ink); }
+    .chip { color:var(--ink); }
+    .chip-kebab { border-left:2px solid var(--ink); color:var(--ink); }
     .seg button.on, .switch.on { background:var(--green); }
     table.scorecard th, table.scorecard td { border:1.5px solid var(--ink); }
     table.scorecard thead th, table.scorecard th.namecol, table.scorecard td.namecol { background:var(--paper); }
@@ -554,14 +559,15 @@
       $('createCourseButton').addEventListener('click', () => openCourseEditor(null));
     }
     function toggleCourseMenu(id) {
-      const menu = document.querySelector(`#courseList .course-menu[data-menu="${CSS.escape(id)}"]`);
+      // Document-brett (inte bara #courseList) så samma kebab-mönster kan återanvändas för sparade spelare.
+      const menu = document.querySelector(`.course-menu[data-menu="${CSS.escape(id)}"]`);
       if (!menu) return;
       const willOpen = menu.hidden; closeCourseMenus();
-      if (willOpen) { menu.hidden = false; const k = document.querySelector(`#courseList .course-kebab[data-kebab="${CSS.escape(id)}"]`); if (k) k.setAttribute('aria-expanded', 'true'); }
+      if (willOpen) { menu.hidden = false; const k = document.querySelector(`.course-kebab[data-kebab="${CSS.escape(id)}"]`); if (k) k.setAttribute('aria-expanded', 'true'); }
     }
     function closeCourseMenus() {
-      document.querySelectorAll('#courseList .course-menu').forEach(m => m.hidden = true);
-      document.querySelectorAll('#courseList .course-kebab').forEach(k => k.setAttribute('aria-expanded', 'false'));
+      document.querySelectorAll('.course-menu').forEach(m => m.hidden = true);
+      document.querySelectorAll('.course-kebab').forEach(k => k.setAttribute('aria-expanded', 'false'));
     }
 
     /* ---------- course editor ---------- */
@@ -642,12 +648,17 @@
     function renderRoster() {
       const roster = readRoster();
       $('rosterWrap').hidden = roster.length === 0;
-      $('rosterChips').innerHTML = roster.map(p => `<button class="chip add" type="button" data-name="${escapeHtml(p.name)}">${escapeHtml(p.name)}</button>`).join('');
-      document.querySelectorAll('#rosterChips .chip').forEach(chip => chip.addEventListener('click', () => {
+      $('rosterChips').innerHTML = roster.map(p => `<span class="chip-wrap"><button class="chip add" type="button" data-name="${escapeHtml(p.name)}">${escapeHtml(p.name)}</button><button class="chip-kebab course-kebab" type="button" data-kebab="${p.id}" aria-haspopup="true" aria-expanded="false" aria-label="Alternativ för ${escapeHtml(p.name)}">⋮</button><div class="course-menu chip-menu" data-menu="${p.id}" role="menu" hidden><button class="course-menu-item danger" type="button" data-remove-player="${p.id}" role="menuitem">Ta bort</button></div></span>`).join('');
+      document.querySelectorAll('#rosterChips .chip.add').forEach(chip => chip.addEventListener('click', () => {
         const values = setupValues().filter(Boolean);
         if (values.length >= 10) return;
         if (values.some(v => v.toLowerCase() === chip.dataset.name.toLowerCase())) return;
         values.push(chip.dataset.name); renderSetup(values);
+      }));
+      document.querySelectorAll('#rosterChips .chip-kebab').forEach(btn => btn.addEventListener('click', () => toggleCourseMenu(btn.dataset.kebab)));
+      document.querySelectorAll('#rosterChips [data-remove-player]').forEach(btn => btn.addEventListener('click', () => {
+        const id = btn.dataset.removePlayer, p = roster.find(r => r.id === id); closeCourseMenus();
+        confirmAction('Ta bort sparad spelare?', `"${p ? p.name : ''}" tas bort ur snabblistan. Sparade rundor och statistik påverkas inte.`, () => { saveRoster(readRoster().filter(r => r.id !== id)); renderRoster(); });
       }));
     }
     function renderSetup(players = ['']) {
