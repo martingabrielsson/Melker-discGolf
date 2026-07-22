@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ff4d20">
+  <meta name="theme-color" content="#0b0b0b">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
@@ -244,6 +244,32 @@
     .loading-disc img { width:180%; height:180%; object-fit:cover; display:block; margin:-40%; }
     .loading-shadow { width:170px; height:22px; margin-top:10px; border-radius:50%; background:radial-gradient(ellipse at center, oklch(0 0 0 / 0.35), transparent 72%); animation:discShadowPulse 1.1s ease-in-out infinite; }
     @media (prefers-reduced-motion:reduce) { .loading-wrap, .loading-disc, .loading-shadow { animation:none; } }
+
+    /* "Friends Don't Lie" — monokrom + varm röd accent, inspirerad av retro affischkonst och handskriven marker-stil. */
+    :root { --ink:#f4f2ee; --green:#e0362a; --leaf:#f4f2ee; --lime:#241514; --sand:#0b0b0b; --paper:#1a1917; --muted:#9c9892; --line:#332f2c; --danger:#e0362a; --shadow:4px 5px 0 rgba(0,0,0,.7); }
+    body { background-color:var(--sand); background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.5px); background-size:9px 9px; }
+    h1 { transform:rotate(-1.5deg); display:inline-block; text-shadow:3px 3px 0 var(--green); }
+    h2 { text-shadow:2px 2px 0 var(--green); }
+    .course:disabled { background:#151412; }
+    input[type=text], input[type=number], select { background:#141311; color:var(--ink); }
+    .progress { background:#141311; }
+    .score-btn, .qbtn { background:#141311; }
+    .score-btn:disabled { color:#57534e; background:#1f1d1a; }
+    .score-value { background:var(--lime); color:var(--ink); }
+    .switch { background:#2a2724; }
+    .dist-bar { background:#2a2724; }
+    /* Score-status: strikt svart/vitt/rött. Vit = bra (ljusare = bättre), grå = par, rött = dåligt (mer mättat = värre). */
+    .s-ace { background:#fff; border-color:var(--green); color:#0b0b0b; }
+    .s-eagle { background:#cfcac2; border-color:#8f887c; color:#17150f; }
+    .s-birdie { background:#57534c; border-color:#726c62; color:#f4f2ee; }
+    .s-par { background:#2a2724; border-color:#454138; color:#b7b2a9; }
+    .s-bogey { background:#3a1712; border-color:var(--green); color:#ffcfc7; }
+    .s-dbogey { background:#5c1c13; border-color:var(--green); color:#ffdad4; }
+    .s-worse { background:#85231a; border-color:#ff6b56; color:#fff; }
+    .pb-banner { background:var(--ink); color:#0b0b0b; border:2px solid var(--green); box-shadow:4px 5px 0 var(--green); }
+    /* Dekorativa retro-ikoner (kompass/walkie-talkie/kamera) — endast utsmyckning, inga knappar. */
+    .deco-icon { display:inline-block; vertical-align:-4px; margin-right:6px; color:var(--green); }
+    .loading-disc { box-shadow:0 0 60px oklch(0.55 0.19 24 / 0.4); }
   </style>
 </head>
 <body>
@@ -360,7 +386,7 @@
 
     <section class="view" id="historyView" aria-labelledby="historyTitle">
       <button class="text-btn back" type="button" data-go="home">‹ Till start</button>
-      <h1 id="historyTitle">Tidigare rundor</h1>
+      <h1 id="historyTitle"><svg class="deco-icon" width="26" height="26" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2.5" y="6.5" width="15" height="10.5" rx="1.5"/><path d="M7.5 6.5 8.7 4.5h2.6l1.2 2"/><circle cx="10" cy="11.7" r="3.1"/></svg>Tidigare rundor</h1>
       <p class="lead">Sparade på den här enheten.</p>
       <div class="history-list" id="historyList"></div>
     </section>
@@ -514,19 +540,15 @@
         const par = coursePar(c.holes), len = courseLength(c.holes);
         const meta = `${c.holes.length} hål · par ${par}${len ? ` · ${len} m` : ''}`;
         const tag = c.builtin ? '' : '<span class="tag">Egen</span>';
-        // Egna banor får en trepricksmeny (⋮) före namnet med alternativ (Redigera/Ta bort).
+        // Egna banor får en trepricksmeny (⋮) före namnet med alternativet Redigera.
         const kebab = c.builtin ? '' : `<button class="course-kebab" type="button" data-kebab="${id}" aria-haspopup="true" aria-expanded="false" aria-label="Alternativ för ${escapeHtml(c.name)}">⋮</button>`;
-        const menu = c.builtin ? '' : `<div class="course-menu" data-menu="${id}" role="menu" hidden><button class="course-menu-item" type="button" data-edit="${id}" role="menuitem">Redigera</button><button class="course-menu-item danger" type="button" data-del="${id}" role="menuitem">Ta bort</button></div>`;
+        const menu = c.builtin ? '' : `<div class="course-menu" data-menu="${id}" role="menu" hidden><button class="course-menu-item" type="button" data-edit="${id}" role="menuitem">Redigera</button></div>`;
         return `<div class="course${c.builtin ? '' : ' has-menu'}" data-course="${id}">${kebab}<button class="course-select" type="button" data-course="${id}"><span class="course-name">${escapeHtml(c.name)}${tag}</span><span class="course-meta">${meta}</span></button><span class="course-arrow" aria-hidden="true">›</span>${menu}</div>`;
       }).join('') + `<button class="course" type="button" id="createCourseButton"><span class="course-name">＋ Skapa egen bana</span><span class="course-arrow" aria-hidden="true">›</span></button>`;
       document.querySelectorAll('#courseList .course-select').forEach(btn => btn.addEventListener('click', () => { if (btn.dataset.variantToggle) toggleCourseMenu(btn.dataset.variantToggle); else chooseCourse(btn.dataset.course); }));
       document.querySelectorAll('#courseList .course-kebab').forEach(btn => btn.addEventListener('click', () => toggleCourseMenu(btn.dataset.kebab)));
       document.querySelectorAll('#courseList [data-variant]').forEach(btn => btn.addEventListener('click', () => { closeCourseMenus(); chooseCourse(btn.dataset.course, btn.dataset.variant); }));
       document.querySelectorAll('#courseList [data-edit]').forEach(btn => btn.addEventListener('click', () => { closeCourseMenus(); openCourseEditor(btn.dataset.edit); }));
-      document.querySelectorAll('#courseList [data-del]').forEach(btn => btn.addEventListener('click', () => {
-        const cid = btn.dataset.del, c = courseDef(cid); closeCourseMenus();
-        confirmAction('Ta bort banan?', `Banan "${c ? c.name : ''}" tas bort och kan inte längre väljas. Sparade rundor på banan påverkas inte.`, () => { saveCourses(customCourses().filter(x => x.id !== cid)); updateHome(); });
-      }));
       $('createCourseButton').addEventListener('click', () => openCourseEditor(null));
     }
     function toggleCourseMenu(id) {
@@ -597,7 +619,8 @@
       $('statsToggle').classList.remove('on'); $('statsToggle').setAttribute('aria-checked', 'false');
       const holes = selectedHoles(), name = selectedCourseName();
       const par = coursePar(holes), len = courseLength(holes);
-      $('courseNotice').innerHTML = `${escapeHtml(name)}: ${holes.length} hål, par ${par}${len ? ` och ${len} m totalt` : ''}.`;
+      const compassIcon = '<svg class="deco-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M12.3 7.7 10.9 10.9 7.7 12.3 9.1 9.1 12.3 7.7Z"/></svg>';
+      $('courseNotice').innerHTML = `${compassIcon}${escapeHtml(name)}: ${holes.length} hål, par ${par}${len ? ` och ${len} m totalt` : ''}.`;
       // Varje bana med egen bild har ett dedikerat <img>-element som bara visas för just den banan.
       const raneboMapEl = $('raneboMap'), raneboMapSrc = (c.builtin && c.id === 'ranebo' && c.map) ? c.map : null;
       raneboMapEl.hidden = !raneboMapSrc; if (raneboMapSrc) raneboMapEl.src = raneboMapSrc;
@@ -866,7 +889,7 @@
         diffHtml = `<select id="statsCourseSelect" aria-label="Välj bana">${courses.map(c => `<option value="${escapeHtml(c.key)}" ${c.key === statsCourseId ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}</select>` +
           diff.map(d => {
             const w = d.over != null ? Math.max(4, (Math.max(0, d.over) / maxOver) * 100) : 0;
-            const col = d.over > 0.3 ? 'var(--danger)' : d.over > 0 ? '#e08a63' : 'var(--leaf)';
+            const col = d.over > 0.3 ? 'var(--danger)' : d.over > 0 ? '#726c62' : 'var(--leaf)';
             return `<div class="hole-diff-row"><span class="number">Hål ${d.number}</span><div class="dist-bar"><span style="width:${w}%;background:${col}"></span></div><span>${d.avg != null ? d.avg.toFixed(2) : '–'}</span><span>${d.over != null ? (d.over >= 0 ? '+' : '') + d.over.toFixed(2) : ''}</span></div>`;
           }).join('');
       }
@@ -885,7 +908,7 @@
         <div class="notice">Bästa rundor — ${escapeHtml(bestList)}</div>
         <div class="section-head"><h2>Trend</h2></div>
         <div class="card" style="padding:14px 16px">${sparkline(p.trend)}<p class="subtle" style="margin-top:8px">Resultat mot par per runda, äldst till nyast.</p></div>
-        <div class="section-head"><h2>Inbördes möten</h2></div>
+        <div class="section-head"><h2><svg class="deco-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="5" y="6" width="10" height="12" rx="1.5"/><path d="M8 6V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/><line x1="7.5" y1="10" x2="12.5" y2="10"/><line x1="7.5" y1="13" x2="12.5" y2="13"/></svg>Inbördes möten</h2></div>
         <div class="card" style="padding:6px 16px 14px">${h2hRows}</div>
         <div class="section-head"><h2>Hålsvårighet</h2></div>
         <div class="card" style="padding:14px 16px">${diffHtml}</div>`;
